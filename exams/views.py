@@ -32,6 +32,7 @@ def __sync_memories(user: User, book: Book, exam_type: str):
         memory.word = word
         memory.book = book
         memory.type = exam_type
+        memory.unlock_dt = timezone.now()
         memory.save()
 
 
@@ -81,10 +82,10 @@ def exam(request: HttpRequest, book_id: int, exam_type: str) -> HttpResponse:
 
 def __get_statistics(memory: Memory) -> Statistics:
     try:
-        return Statistics.objects.get(user=memory.user, book=memory.book, exam_date=timezone.now(),
+        return Statistics.objects.get(user=memory.user, book=memory.book, exam_date=timezone.now()-timedelta(hours=4),
                                       type=memory.type, step=memory.step, status=memory.status)
     except ObjectDoesNotExist:
-        return Statistics(user=memory.user, book=memory.book, exam_date=timezone.now(),
+        return Statistics(user=memory.user, book=memory.book, exam_date=timezone.now()-timedelta(hours=4),
                           type=memory.type, step=memory.step, status=memory.status)
 
 

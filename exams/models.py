@@ -83,7 +83,7 @@ class Memory(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE)
     type = models.CharField(max_length=1, choices=MEMORY_TYPES)
     step = models.SmallIntegerField(default=0)
-    unlock_dt = models.DateTimeField(auto_now_add=True)
+    unlock_dt = models.DateTimeField()
     status = models.CharField(max_length=1, choices=MEMORY_STATUS, default=MemoryStatus.Unknown)
     group_level = models.SmallIntegerField(default=0)
     aware_cnt = models.SmallIntegerField(default=0)
