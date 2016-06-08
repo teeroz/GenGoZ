@@ -1,119 +1,147 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GenGoZ Exam</title>
 
-<script src="https://code.jquery.com/jquery-2.2.3.min.js"
-        integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
-        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-      integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
-      crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"
+            integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
+            crossorigin="anonymous"></script>
 
-<!-- Optional theme -->
-<link rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
-      integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
-      crossorigin="anonymous">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+          crossorigin="anonymous">
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-        crossorigin="anonymous"></script>
+    <!-- Optional theme -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
+          crossorigin="anonymous">
 
-<script>
-    $(function () {
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
 
-        $('#showButton').on('click', show);
-        $('#awareButton').on('click', aware);
-        $('#forgotButton').on('click', forgot);
+    <script>
+        $(function () {
 
-        $(document).keyup(function (event) {
-            if ($('#answer').hasClass('invisible')) {
-                if (event.which == 38 /* up arrow */) {
-                    return show();
+            $('#showButton').on('click', show);
+            $('#awareButton').on('click', aware);
+            $('#forgotButton').on('click', forgot);
+
+            $(document).keyup(function (event) {
+                if ($('#answer').hasClass('invisible')) {
+                    if (event.which == 38 /* up arrow */) {
+                        return show();
+                    }
                 }
+                else {
+                    if (event.which == 37 /* left arrow */) {
+                        return aware();
+                    }
+                    else if (event.which == 39 /* right arrow */) {
+                        return forgot();
+                    }
+                }
+            });
+
+            function show() {
+                $('#answer').removeClass('invisible')
+                $('#questionPhase').hide();
+                $('#answerPhase').removeClass('hidden');
+                $('#related_terms').removeClass('hidden');
+                $('#status').hide();
             }
-            else {
-                if (event.which == 37 /* left arrow */) {
-                    return aware();
-                }
-                else if (event.which == 39 /* right arrow */) {
-                    return forgot();
-                }
+
+            function aware() {
+                window.location.href = '{% url 'aware' memory.id %}'
+            }
+
+            function forgot() {
+                window.location.href = '{% url 'forgot' memory.id %}'
             }
         });
+    </script>
 
-        function show() {
-            $('#answer').removeClass('invisible')
-            $('#questionPhase').hide();
-            $('#answerPhase').removeClass('hidden')
-            $('#related_terms').removeClass('hidden')
+    <style>
+        .vertical-center {
+            min-width: 100%;
+            min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+            min-height: 100vh; /* These two lines are counted as one :-)       */
+
+            display: flex;
+            align-items: center;
         }
 
-        function aware() {
-            window.location.href = '{% url 'aware' memory.id %}'
+        .jumbotron {
+            background-color: #fff;
         }
 
-        function forgot() {
-            window.location.href = '{% url 'forgot' memory.id %}'
+        .footer-desc {
+            position: absolute;
+            right: 2em;
+            bottom: 1.5em;
         }
-    });
-</script>
+    </style>
+</head>
+<body>
+    <div class="vertical-center">
+        <div class="container">
+            <h1 class="text-center">{{ question }}</h1>
 
-<div class="text-muted" style="position: relative; float: right; top: 100%; transform: translateY(-100%); right: 2em; padding-bottom: 2em;">
-    <small>{{ remain_count }} words / {{ memory.step }} step / {{ memory.group_level }} level</small>
-</div>
-<div id="related_terms" class="text-muted hidden" style="position: relative; float: left; top: 100%; transform: translateY(-100%); left: 2em; padding-bottom: 2em;">
-    <small>
-        {% autoescape off %}
+            <div id="answer" class="text-center invisible" style="margin-top:3em;">
+                <h2 class="text-primary">
+                    <div>{{ answer }}</div>
+                    {% if memory.word.pronunciation %}
+                    <div style="margin-top: 0em;"><small>[{{ memory.word.pronunciation }}]</small></div>
+                    {% endif %}
+                </h2>
+            </div>
+            <div style="margin-top: 5em; margin-bottom: 3em;">
+                <div id="questionPhase" class="text-center">
+                    <button id="showButton" class="btn btn-lg btn-info" type="button">Show reminders [↑]</button>
+                </div>
+                <div id="answerPhase" class="hidden text-center">
+                    <button id="awareButton" class="btn btn-lg btn-success" type="button">Remember [←]</button>
+                    <button id="forgotButton" class="btn btn-lg btn-danger" type="button">&nbsp;&nbsp;&nbsp;&nbsp;Forget [→]&nbsp;&nbsp;&nbsp;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="status" class="text-muted footer-desc">
+        <small>{{ remain_count }} words / {{ memory.step }} step / {{ memory.group_level }} level</small>
+    </div>
+
+    <div id="related_terms" class="text-muted hidden footer-desc">
+        <small>
+            {% autoescape off %}
             {{ memory.word.string_with_link }}
             {% if memory.word.related.all %}
-                / [관]
-                {% for word in memory.word.related.all %}
-                    {{ word.string_with_link }}
-                {% endfor %}
+            / [관]
+            {% for word in memory.word.related.all %}
+            {{ word.string_with_link }}
+            {% endfor %}
             {% endif %}
             {% if memory.word.synonym.all %}
-                / [유]
-                {% for word in memory.word.synonym.all %}
-                    {{ word.string_with_link }}
-                {% endfor %}
+            / [유]
+            {% for word in memory.word.synonym.all %}
+            {{ word.string_with_link }}
+            {% endfor %}
             {% endif %}
             {% if memory.word.antonym.all %}
-                / [반]
-                {% for word in memory.word.antonym.all %}
-                    {{ word.string_with_link }}
-                {% endfor %}
+            / [반]
+            {% for word in memory.word.antonym.all %}
+            {{ word.string_with_link }}
+            {% endfor %}
             {% endif %}
-        {% endautoescape %}
-    </small>
-</div>
-<div style="position: relative; top: 50%; transform: translateY(-50%);">
-    <div>&nbsp;</div>
-    <div>&nbsp;</div>
-
-    <h1 class="text-center">{{ question }}</h1>
-
-    <div id="answer" class="text-center invisible" style="margin-top:4em;">
-        <h2 class="text-primary">
-            <div>{{ answer }}</div>
-            {% if memory.word.pronunciation %}
-            <div style="margin-top: 0.25em;"><small>[{{ memory.word.pronunciation }}]</small></div>
-            {% endif %}
-        </h2>
-    </div>
-    <div style="margin-top: 5em; margin-bottom: 3em;">
-        <div id="questionPhase" class="text-center">
-            <input id="showButton" class="btn btn-lg btn-info" type="button" value="Show reminders [↑]" />
-        </div>
-        <div id="answerPhase" class="text-center hidden">
-            <input id="awareButton" class="btn btn-lg btn-success" type="button" value="I was aware. [←]" />
-            <input id="forgotButton" class="btn btn-lg btn-danger" type="button" value="Oops, I forgot. [→]" />
-        </div>
+            {% endautoescape %}
+        </small>
     </div>
 
-    <div>&nbsp;</div>
-    <div>&nbsp;</div>
-</div>
-
+</body>
