@@ -37,12 +37,18 @@ def __sync_memories(user: User, book: Book, exam_type: str):
 
 
 def __get_random_memory(user: User, book: Book, exam_type: str) -> Word:
-    # return Memory.objects.get(pk=819)
-    memories = Memory.objects.filter(user=user, book=book, type=exam_type, unlock_dt__lte=timezone.now()) \
-                     .order_by('group_level', '?')[:1]
-    if len(memories) <= 0:
-        return None
-    else:
+    while True:
+        # return Memory.objects.get(pk=1540)
+        memories = Memory.objects.filter(user=user, book=book, type=exam_type, unlock_dt__lte=timezone.now()) \
+                         .order_by('group_level', '?')[:1]
+        if len(memories) <= 0:
+            return None
+        memory = memories[0]    # type: Memory
+        if memory.word.book != memory.book:
+            memory.book = memory.word.book
+            memory.save()
+            continue
+
         return memories[0]
 
 
