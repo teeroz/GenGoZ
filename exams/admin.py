@@ -89,7 +89,7 @@ class MemoryAdmin(admin.ModelAdmin):
                     'group_level', 'aware_cnt', 'forgot_cnt', 'modified_at')
     list_display_links = ('id',)
     list_filter = ('user', 'book', 'type', 'step', 'status')
-    ordering = ['unlock_dt']
+    ordering = ['-modify_dt']
     preserve_filters = True
     list_select_related = ('user', 'book', 'word')
 

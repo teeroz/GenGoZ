@@ -121,22 +121,22 @@
             {% autoescape off %}
             {{ memory.word.string_with_link }}
             {% if memory.word.related.all %}
-            / [관]
-            {% for word in memory.word.related.all %}
-            {{ word.string_with_link }}
-            {% endfor %}
+                / [관]
+                {% for word in memory.word.related.all %}
+                    {{ word.string_with_link }}
+                {% endfor %}
             {% endif %}
             {% if memory.word.synonym.all %}
-            / [유]
-            {% for word in memory.word.synonym.all %}
-            {{ word.string_with_link }}
-            {% endfor %}
+                / [유]
+                {% for word in memory.word.synonym.all %}
+                    {{ word.string_with_link }}
+                {% endfor %}
             {% endif %}
             {% if memory.word.antonym.all %}
-            / [반]
-            {% for word in memory.word.antonym.all %}
-            {{ word.string_with_link }}
-            {% endfor %}
+                / [반]
+                {% for word in memory.word.antonym.all %}
+                    {{ word.string_with_link }}
+                {% endfor %}
             {% endif %}
             {% endautoescape %}
         </small>

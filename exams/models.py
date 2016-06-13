@@ -7,7 +7,6 @@ class User(models.Model):
     modify_dt = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-
         return self.name
 
 
@@ -18,7 +17,6 @@ class Book(models.Model):
     modify_dt = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-
         return self.title
 
 
