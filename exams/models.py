@@ -114,3 +114,21 @@ class Statistics(models.Model):
 
     class Meta:
         unique_together = ('user', 'book', 'type', 'step', 'status', 'exam_date')
+
+
+class Study(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)    # type: User
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)    # type: Book
+    word = models.ForeignKey(Word, on_delete=models.CASCADE)    # type: Word
+    type = models.CharField(max_length=1, choices=MEMORY_TYPES)
+    memory = models.ForeignKey(Memory, on_delete=models.CASCADE)    # type: Memory
+    create_dt = models.DateTimeField(auto_now_add=True)
+
+    def word_kanzi(self):
+        return self.word.word
+
+    def word_pronunciation(self):
+        return self.word.pronunciation
+
+    def word_meaning(self):
+        return self.word.meaning

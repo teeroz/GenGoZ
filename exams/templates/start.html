@@ -40,8 +40,9 @@
 </head>
 <body>
     <div class="vertical-center">
-        <div class="container">
-            <h1 class="text-center">お疲れ様でした</h1>
+        <div class="container text-center">
+            <h1 class="text-center">覚える単語が{{remain_count}}個残ります。</h1>
+            <a href="{% url 'do_start' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="margin-top: 5em;">START</a>
         </div>
     </div>
 </body>

@@ -59,11 +59,11 @@
             }
 
             function aware() {
-                window.location.href = '{% url 'aware' memory.id %}'
+                window.location.href = '{% url 'aware' study.id %}'
             }
 
             function forgot() {
-                window.location.href = '{% url 'forgot' memory.id %}'
+                window.location.href = '{% url 'forgot' study.id %}'
             }
         });
     </script>
@@ -95,8 +95,8 @@
             <div id="answer" class="text-center invisible" style="margin-top:3em;">
                 <h2 class="text-primary">
                     <div>{{ answer }}</div>
-                    {% if memory.word.pronunciation %}
-                    <div style="margin-top: 0em;"><small>[{{ memory.word.pronunciation }}]</small></div>
+                    {% if study.word.pronunciation %}
+                    <div style="margin-top: 0em;"><small>[{{ study.word.pronunciation }}]</small></div>
                     {% endif %}
                 </h2>
             </div>
@@ -113,33 +113,33 @@
     </div>
 
     <div id="status" class="text-muted footer-desc">
-        <small>{{ remain_count }} words / {{ memory.step }} step / {{ memory.group_level }} level</small>
+        <small>{{ remain_count }} words / {{ study.memory.step }} step / {{ study.memory.group_level }} level</small>
     </div>
 
     <div id="related_terms" class="text-muted hidden footer-desc">
         <small>
             {% autoescape off %}
-            {{ memory.word.string_with_link }}
-            {% if memory.word.related.all %}
+            {{ study.word.string_with_link }}
+            {% if study.word.related.all %}
                 / [관]
-                {% for word in memory.word.related.all %}
+                {% for word in study.word.related.all %}
                     {{ word.string_with_link }}
                 {% endfor %}
             {% endif %}
-            {% if memory.word.synonym.all %}
+            {% if study.word.synonym.all %}
                 / [유]
-                {% for word in memory.word.synonym.all %}
+                {% for word in study.word.synonym.all %}
                     {{ word.string_with_link }}
                 {% endfor %}
             {% endif %}
-            {% if memory.word.antonym.all %}
+            {% if study.word.antonym.all %}
                 / [반]
-                {% for word in memory.word.antonym.all %}
+                {% for word in study.word.antonym.all %}
                     {{ word.string_with_link }}
                 {% endfor %}
             {% endif %}
             {% endautoescape %}
         </small>
     </div>
-
 </body>
+</html>

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.forms import ModelForm
 from django.utils import timezone
 
-from exams.models import Book, Word, Memory, User, Statistics
+from exams.models import Book, Word, Memory, User, Statistics, Study
 
 
 def local_time(value: datetime):
@@ -91,6 +91,7 @@ class MemoryAdmin(admin.ModelAdmin):
     list_filter = ('user', 'book', 'type', 'step', 'status')
     ordering = ['-modify_dt']
     preserve_filters = True
+    save_on_top = True
     list_select_related = ('user', 'book', 'word')
 
     @staticmethod
@@ -121,3 +122,13 @@ class StatisticsAdmin(admin.ModelAdmin):
     @staticmethod
     def modified_at(obj: Memory) -> str:
         return local_time(obj.modify_dt).strftime('%m.%d %H:%M')
+
+
+@admin.register(Study)
+class StudyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'book', 'word_kanzi', 'word_pronunciation', 'word_meaning', 'type')
+    list_display_links = ('word_kanzi',)
+    list_filter = ('book', 'type')
+    preserve_filters = True
+    save_on_top = True
+

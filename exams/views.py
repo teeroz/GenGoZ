@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpRequest, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from exams.models import Book, Memory, User, MemoryTypes, Word, MemoryStatus, Statistics
+from exams.models import Book, Memory, User, MemoryTypes, Word, MemoryStatus, Statistics, Study
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -29,61 +29,112 @@ def __sync_memories(user: User, book: Book, exam_type: str):
         assert isinstance(word, Word)
         memory = Memory()
         memory.user = user
-        memory.word = word
         memory.book = book
+        memory.word = word
         memory.type = exam_type
         memory.unlock_dt = timezone.now()
         memory.save()
 
 
+def __generate_study(user: User, book: Book, exam_type: str):
+    memories = Memory.objects.filter(user=user, word__book=book, type=exam_type, unlock_dt__lte=timezone.now())\
+                     .order_by('?')
+
+    for memory in memories:
+        assert isinstance(memory, Memory)
+
+        if memory.book != memory.word.book:
+            memory.book = memory.word.book
+            memory.save()
+
+        study = Study()
+        study.user = user
+        study.book = book
+        study.word = memory.word
+        study.type = exam_type
+        study.memory = memory
+        study.save()
+
+
 def __get_random_memory(user: User, book: Book, exam_type: str) -> Word:
     while True:
         # return Memory.objects.get(pk=1540)
-        memories = Memory.objects.filter(user=user, book=book, type=exam_type, unlock_dt__lte=timezone.now()) \
-                         .order_by('group_level', '?')[:1]
-        if len(memories) <= 0:
+        study_words = Study.objects.filter(user=user, word__book=book, type=exam_type)[:1]
+        if len(study_words) <= 0:
             return None
-        memory = memories[0]    # type: Memory
-        if memory.word.book != memory.book:
-            memory.book = memory.word.book
-            memory.save()
-            continue
+        study_word = study_words[0]    # type: Memory
 
-        return memories[0]
+        if study_word.book != study_word.word.book:
+            study_word.book = study_word.word.book
+            study_word.save()
+
+        return study_word
 
 
-def __get_remain_count(user: User, book: Book, exam_type: str) -> int:
-    return Memory.objects.filter(user=user, book=book, type=exam_type, unlock_dt__lte=timezone.now()).count()
+def __count_study_words(user: User, book: Book, exam_type: str) -> int:
+    return Study.objects.filter(user=user, word__book=book, type=exam_type).count()
 
 
 def exam(request: HttpRequest, book_id: int, exam_type: str) -> HttpResponse:
     user = __get_user()
     book = get_object_or_404(Book, pk=book_id)  # type: Book
 
-    __sync_memories(user, book, exam_type)
-    memory = __get_random_memory(user, book, exam_type)
-    remain_count = __get_remain_count(user, book, exam_type)
+    study = __get_random_memory(user, book, exam_type)
+    if study is None:
+        return start(request, user, book, exam_type)
 
-    if memory is None:
-        return render(request, 'finish.html')
+    count_test_words = __count_study_words(user, book, exam_type)
 
     if exam_type == MemoryTypes.Word:
-        question = memory.word.word     # type: str
-        answer = memory.word.meaning    # type: str
+        question = study.word.word     # type: str
+        answer = study.word.meaning    # type: str
     elif exam_type == MemoryTypes.Meaning:
-        question = memory.word.meaning  # type: str
-        answer = memory.word.word    # type: str
+        question = study.word.meaning  # type: str
+        answer = study.word.word    # type: str
     else:
         raise Http404('Invalid Exam-Type.')
 
     context = {
-        'memory': memory,
+        'study': study,
         'question': question,
         'answer': answer,
-        'remain_count': remain_count,
+        'remain_count': count_test_words,
     }
 
     return render(request, 'exam.html', context)
+
+
+def __count_unlocked_words(user: User, book: Book, exam_type: str) -> int:
+    return Memory.objects.filter(user=user, book=book, type=exam_type, unlock_dt__lte=timezone.now()).count()
+
+
+def start(request: HttpRequest, user: User, book: Book, exam_type: str) -> HttpResponse:
+    __sync_memories(user, book, exam_type)
+    count_test_words = __count_unlocked_words(user, book, exam_type)
+    if count_test_words <= 0:
+        return render(request, 'finish.html')
+
+    context = {
+        'book_id': book.id,
+        'exam_type': exam_type,
+        'remain_count': count_test_words,
+    }
+
+    return render(request, 'start.html', context)
+
+
+def do_start(request: HttpRequest, book_id: str, exam_type: str) -> HttpResponse:
+    user = __get_user()
+    book = get_object_or_404(Book, pk=book_id)  # type: Book
+
+    __sync_memories(user, book, exam_type)
+    count_test_words = __count_unlocked_words(user, book, exam_type)
+    if count_test_words <= 0:
+        return render(request, 'finish.html')
+
+    __generate_study(user, book, exam_type)
+
+    return redirect('exam', book_id=book.id, exam_type=exam_type)
 
 
 def __get_statistics(memory: Memory) -> Statistics:
@@ -95,8 +146,9 @@ def __get_statistics(memory: Memory) -> Statistics:
                           type=memory.type, step=memory.step, status=memory.status)
 
 
-def aware(request: HttpRequest, memory_id: int) -> HttpResponse:
-    memory = get_object_or_404(Memory, pk=memory_id)    # type: Memory
+def aware(request: HttpRequest, study_id: int) -> HttpResponse:
+    study = get_object_or_404(Study, pk=study_id)    # type: Memory
+    memory = study.memory
 
     # 첫 테스트에 바로 맞췄다면
     if memory.group_level <= 0:
@@ -135,11 +187,14 @@ def aware(request: HttpRequest, memory_id: int) -> HttpResponse:
     memory.group_level = 0
     memory.save()
 
+    study.delete()
+
     return redirect('exam', book_id=memory.book.id, exam_type=memory.type)
 
 
-def forgot(request: HttpRequest, memory_id: int) -> HttpResponse:
-    memory = get_object_or_404(Memory, pk=memory_id)    # type: Memory
+def forgot(request: HttpRequest, study_id: int) -> HttpResponse:
+    study = get_object_or_404(Study, pk=study_id)    # type: Study
+    memory = study.memory
 
     # 첫 테스트라면
     if memory.group_level <= 0:
@@ -154,5 +209,7 @@ def forgot(request: HttpRequest, memory_id: int) -> HttpResponse:
     memory.status = MemoryStatus.Forgot
     memory.group_level += 1
     memory.save()
+
+    study.delete()
 
     return redirect('exam', book_id=memory.book.id, exam_type=memory.type)
