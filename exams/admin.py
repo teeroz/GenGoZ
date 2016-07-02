@@ -65,20 +65,6 @@ class WordAdmin(admin.ModelAdmin):
     form = WordModelForm
 
     @staticmethod
-    def related_terms(obj: Word) -> str:
-        result = []
-        related_str = ', '.join([p.word for p in obj.related.all()])
-        if related_str:
-            result.append('[관] %s' % related_str)
-        synonym_str = ', '.join([p.word for p in obj.synonym.all()])
-        if synonym_str:
-            result.append('[유] %s' % synonym_str)
-        antonym_str = ', '.join([p.word for p in obj.antonym.all()])
-        if antonym_str:
-            result.append('[반] %s' % antonym_str)
-        return ' / '.join(result)
-
-    @staticmethod
     def created_at(obj: Memory) -> str:
         return local_time(obj.create_dt).strftime('%m.%d %H:%M')
 

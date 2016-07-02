@@ -1,6 +1,17 @@
 from django.db import models
 
 
+class ExamTypes:
+    Word = 'w'
+    Meaning = 'm'
+    Unknown = ''
+
+EXAM_TYPES = (
+    (ExamTypes.Word, 'Word'),
+    (ExamTypes.Meaning, 'Meaning'),
+)
+
+
 class User(models.Model):
     name = models.CharField(max_length=32, unique=True)
     create_dt = models.DateTimeField(auto_now_add=True)
@@ -49,18 +60,21 @@ class Word(models.Model):
             html = content
         return html
 
+    def related_terms(self) -> str:
+        result = []
+        related_str = ', '.join([p.word for p in self.related.all()])
+        if related_str:
+            result.append('[관] %s' % related_str)
+        synonym_str = ', '.join([p.word for p in self.synonym.all()])
+        if synonym_str:
+            result.append('[유] %s' % synonym_str)
+        antonym_str = ', '.join([p.word for p in self.antonym.all()])
+        if antonym_str:
+            result.append('[반] %s' % antonym_str)
+        return ' / '.join(result)
+
     def __str__(self):
         return '%s:%s:%s' % (self.word, self.pronunciation, self.meaning)
-
-
-class MemoryTypes:
-    Word = 'w'
-    Meaning = 'm'
-
-MEMORY_TYPES = (
-    ('w', 'Word'),
-    ('m', 'Meaning'),
-)
 
 
 class MemoryStatus:
@@ -79,7 +93,7 @@ class Memory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     word = models.ForeignKey(Word, on_delete=models.CASCADE)
-    type = models.CharField(max_length=1, choices=MEMORY_TYPES)
+    type = models.CharField(max_length=1, choices=EXAM_TYPES)
     step = models.SmallIntegerField(default=0)
     unlock_dt = models.DateTimeField()
     status = models.CharField(max_length=1, choices=MEMORY_STATUS, default=MemoryStatus.Unknown)
@@ -104,7 +118,7 @@ class Statistics(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     exam_date = models.DateField()
-    type = models.CharField(max_length=1, choices=MEMORY_TYPES)
+    type = models.CharField(max_length=1, choices=EXAM_TYPES)
     step = models.SmallIntegerField()
     status = models.CharField(max_length=1, choices=MEMORY_STATUS)
     aware_cnt = models.IntegerField(default=0)
@@ -119,10 +133,13 @@ class Statistics(models.Model):
 class Study(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)    # type: User
     book = models.ForeignKey(Book, on_delete=models.CASCADE)    # type: Book
+    type = models.CharField(max_length=1, choices=EXAM_TYPES)
     word = models.ForeignKey(Word, on_delete=models.CASCADE)    # type: Word
-    type = models.CharField(max_length=1, choices=MEMORY_TYPES)
     memory = models.ForeignKey(Memory, on_delete=models.CASCADE)    # type: Memory
     create_dt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'book', 'type', 'word')
 
     def word_kanzi(self):
         return self.word.word
