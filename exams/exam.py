@@ -60,7 +60,7 @@ class Exam:
     def get_random_memory(self) -> Word:
         while True:
             # return Memory.objects.get(pk=1540)
-            study_words = Study.objects.filter(user=self.user, word__book=self.book, type=self.type)[:1]
+            study_words = Study.objects.filter(user=self.user, word__book=self.book, type=self.type).order_by('?')[:1]
             if len(study_words) <= 0:
                 return None
             study_word = study_words[0]    # type: Memory
