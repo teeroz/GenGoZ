@@ -35,7 +35,7 @@ class Exam:
 
     def new_or_wrong_words(self) -> List[Memory]:
         return Memory.objects.select_related('word')\
-                             .filter(user=self.user, book=self.book, type=self.type)\
+                             .filter(user=self.user, book=self.book, type=self.type, unlock_dt__lte=timezone.now())\
                              .exclude(status=MemoryStatus.Aware)\
                              .order_by('word__id')
 
