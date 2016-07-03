@@ -5,8 +5,8 @@ from django.http import HttpResponse, HttpRequest, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from exams.exam import ExamTypes, Exam
-from exams.models import Memory, User, MemoryStatus, Statistics, Study, ExamTypes
+from exams.exam import Exam
+from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes
 
 
 def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
@@ -75,7 +75,7 @@ def __get_statistics(memory: Memory) -> Statistics:
                           type=memory.type, step=memory.step, status=memory.status)
 
 
-def list(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
+def list_page(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
     a_exam = Exam(book_id=book_id, exam_type=exam_type)
 
     unlocked_memories = a_exam.unlocked_memories()
@@ -85,6 +85,19 @@ def list(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     context = {
         'exam': a_exam,
         'memories': unlocked_memories
+    }
+
+    return render(request, 'list.html', context)
+
+
+def new_words(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
+    a_exam = Exam(book_id=book_id, exam_type=exam_type)
+
+    words = a_exam.new_or_wrong_words()
+
+    context = {
+        'exam': a_exam,
+        'memories': words
     }
 
     return render(request, 'list.html', context)

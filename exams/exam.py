@@ -3,7 +3,7 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from exams.models import Book, Memory, Study, User, Word, ExamTypes
+from exams.models import Book, Memory, Study, User, Word, ExamTypes, MemoryStatus
 
 
 class Exam:
@@ -31,6 +31,12 @@ class Exam:
     def unlocked_memories(self) -> List[Memory]:
         return Memory.objects.select_related('word')\
                              .filter(user=self.user, book=self.book, type=self.type, unlock_dt__lte=timezone.now())\
+                             .order_by('?')
+
+    def new_or_wrong_words(self) -> List[Memory]:
+        return Memory.objects.select_related('word')\
+                             .filter(user=self.user, book=self.book, type=self.type)\
+                             .exclude(status=MemoryStatus.Aware)\
                              .order_by('?')
 
     def sync_memories(self):
