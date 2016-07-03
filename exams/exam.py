@@ -37,7 +37,7 @@ class Exam:
         return Memory.objects.select_related('word')\
                              .filter(user=self.user, book=self.book, type=self.type)\
                              .exclude(status=MemoryStatus.Aware)\
-                             .order_by('?')
+                             .order_by('word__id')
 
     def sync_memories(self):
         memories = self.book.memory_set.filter(user=self.user, type=self.type).order_by('-create_dt')[:1]
