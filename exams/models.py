@@ -90,9 +90,9 @@ MEMORY_STATUS = (
 
 
 class Memory(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    word = models.ForeignKey(Word, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)    # type: User
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)    # type: Book
+    word = models.ForeignKey(Word, on_delete=models.CASCADE)    # type: Word
     type = models.CharField(max_length=1, choices=EXAM_TYPES)
     step = models.SmallIntegerField(default=0)
     unlock_dt = models.DateTimeField()
@@ -112,6 +112,18 @@ class Memory(models.Model):
 
     def __str__(self):
         return self.user.name + ':' + self.book.title + ':' + self.word.word + ':' + self.type
+
+    def question(self) -> str:
+        if self.type == ExamTypes.Meaning:
+            return self.word.meaning
+        elif self.type == ExamTypes.Word:
+            return self.word.word
+
+    def answer(self) -> str:
+        if self.type == ExamTypes.Meaning:
+            return self.word.word
+        elif self.type == ExamTypes.Word:
+            return self.word.meaning
 
 
 class Statistics(models.Model):
