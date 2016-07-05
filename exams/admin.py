@@ -72,7 +72,7 @@ class WordAdmin(admin.ModelAdmin):
 @admin.register(Memory)
 class MemoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'book', 'word_title', 'type', 'step', 'unlocked_at', 'status',
-                    'group_level', 'aware_cnt', 'forgot_cnt', 'modified_at')
+                    'group_level', 'aware_cnt', 'forgot_cnt', 'modified_at', 'unlock_dt')
     list_display_links = ('id',)
     list_filter = ('user', 'book', 'type', 'step', 'status')
     ordering = ['-modify_dt']
