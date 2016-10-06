@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
 from exams.exam import Exam
-from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes
+from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes, Word
 
 
 def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
@@ -18,19 +18,30 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
 
     count_test_words = a_exam.count_study_words()
 
+    word = study.word   # type: Word
+
     if exam_type == ExamTypes.Word:
         question = study.word.word     # type: str
+        question_ex = word.example_jp  # type: str
         answer = study.word.meaning    # type: str
+        answer_ex = word.example_kr    # type: str
     elif exam_type == ExamTypes.Meaning:
         question = study.word.meaning  # type: str
-        answer = study.word.word    # type: str
+        question_ex = word.example_kr  # type: str
+        answer = study.word.word       # type: str
+        answer_ex = word.example_jp  # type: str
     else:
         raise Http404('Invalid Exam-Type.')
+
+    question_ex = question_ex.replace('[', '<code>').replace(']', '</code>')
+    answer_ex = answer_ex.replace('[', '<code>').replace(']', '</code>')
 
     context = {
         'study': study,
         'question': question,
+        'question_ex': question_ex,
         'answer': answer,
+        'answer_ex': answer_ex,
         'remain_count': count_test_words,
     }
 

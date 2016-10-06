@@ -36,6 +36,8 @@ class Word(models.Model):
     word = models.CharField(max_length=256)
     pronunciation = models.CharField(max_length=256, blank=True)
     meaning = models.CharField(max_length=256)
+    example_jp = models.CharField(max_length=256, blank=True)
+    example_kr = models.CharField(max_length=256, blank=True)
     naver_link = models.CharField(max_length=256, blank=True)
     create_dt = models.DateTimeField(auto_now_add=True)
     modify_dt = models.DateTimeField(auto_now=True)

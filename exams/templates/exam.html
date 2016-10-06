@@ -90,15 +90,29 @@
 <body>
     <div class="vertical-center">
         <div class="container">
-            <h1 class="text-center">{{ question }}</h1>
+            <div>
+                <h1 class="text-center">{{ question }}</h1>
+            </div>
+            <div>
+                {% autoescape off %}
+                <h3 class="text-center">{{ question_ex }}</h3>
+                {% endautoescape %}
+            </div>
 
             <div id="answer" class="text-center invisible" style="margin-top:3em;">
-                <h2 class="text-primary">
-                    <div>{{ answer }}</div>
-                    {% if study.word.pronunciation %}
-                    <div style="margin-top: 0em;"><small>[{{ study.word.pronunciation }}]</small></div>
-                    {% endif %}
-                </h2>
+                <div>
+                    <h2 class="text-primary">
+                        <div>{{ answer }}</div>
+                        {% if study.word.pronunciation %}
+                        <div style="margin-top: 0em;"><small>[{{ study.word.pronunciation }}]</small></div>
+                        {% endif %}
+                    </h2>
+                </div>
+                <div>
+                    {% autoescape off %}
+                    <h3 class="text-primary">{{ answer_ex }}</h3>
+                    {% endautoescape %}
+                </div>
             </div>
             <div style="margin-top: 5em; margin-bottom: 3em;">
                 <div id="questionPhase" class="text-center">
