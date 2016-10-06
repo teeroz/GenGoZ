@@ -124,7 +124,7 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
         elif memory.step == 3:
             memory.unlock_dt = timezone.now() + timedelta(days=28*3)
         elif memory.step == 4:
-            memory.unlock_dt = datetime.max()
+            memory.unlock_dt = timezone.now() + timedelta(days=365)
         memory.unlock_dt = memory.unlock_dt - timedelta(hours=8)
         memory.step += 1
 
