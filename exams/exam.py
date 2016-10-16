@@ -37,13 +37,28 @@ class Exam:
                              .exclude(status=MemoryStatus.Aware)\
                              .order_by('word__id')
 
-    def sync_memories(self):
-        memories = self.book.memory_set.filter(user=self.user, type=self.type).order_by('-create_dt')[:1]
+    def __last_created_memory(self):
+        memories = self.book.memory_set.filter(user=self.user, type=self.type).order_by('-word__id')[:1]
 
         if len(memories) <= 0:
+            return None
+
+        return memories[0]
+
+    def __queryset_words_to_add(self):
+        last_memory = self.__last_created_memory()
+
+        if last_memory is None:
             words_to_add = self.book.word_set.filter()
         else:
-            words_to_add = self.book.word_set.filter(create_dt__gt=memories[0].create_dt)
+            words_to_add = self.book.word_set.filter(id__gt=last_memory.word.id)
+
+        return words_to_add
+
+    def sync_memories(self, count: int = 0):
+        words_to_add = self.__queryset_words_to_add()
+        if count > 0:
+            words_to_add = words_to_add.order_by('id')[:count]
 
         for word in words_to_add:   # type: Word
             assert isinstance(word, Word)
@@ -54,6 +69,9 @@ class Exam:
             memory.type = self.type
             memory.unlock_dt = timezone.now()
             memory.save()
+
+    def count_new_words(self):
+        return self.__queryset_words_to_add().count()
 
     def get_random_memory(self) -> Word:
         while True:

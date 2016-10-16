@@ -54,15 +54,17 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
 
 @login_required
 def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
-    a_exam.sync_memories()
+    # a_exam.sync_memories()
+    count_new_words = a_exam.count_new_words()
     count_test_words = a_exam.count_unlocked_words()
-    if count_test_words <= 0:
+    if count_test_words <= 0 and count_new_words <= 0:
         return render(request, 'finish.html')
 
     context = {
         'exam': a_exam,
         'book_id': a_exam.book.id,
         'exam_type': a_exam.type,
+        'new_count': count_new_words,
         'remain_count': count_test_words,
     }
 
@@ -70,14 +72,29 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
 
 
 @login_required
-def do_start(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
+def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
     user = get_user(request)
     a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
-    a_exam.sync_memories()
+    a_exam.sync_memories(20)
     count_test_words = a_exam.count_unlocked_words()
     if count_test_words <= 0:
-        return render(request, 'finish.html')
+        return start(request, a_exam)
+
+    a_exam.generate_study()
+
+    return redirect('exam', book_id=a_exam.book.id, exam_type=a_exam.type)
+
+
+@login_required
+def do_review(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
+
+    # a_exam.sync_memories()
+    count_test_words = a_exam.count_unlocked_words()
+    if count_test_words <= 0:
+        return start(request, a_exam)
 
     a_exam.generate_study()
 

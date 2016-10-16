@@ -28,6 +28,10 @@
             crossorigin="anonymous"></script>
 
     <style>
+        td h1 {
+            margin-top: 0em;
+        }
+
         .vertical-center {
             min-width: 100%;
             min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
@@ -48,11 +52,26 @@
 </head>
 <body>
     <div class="vertical-center">
-        <div class="container text-center">
-            <h1 class="text-center">覚える単語が{{remain_count}}個残ります。</h1>
-            <div style="margin-top: 10em;">
-                <a href="{% url 'do_start' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="width: 7em;">START</a>
-                <a href="{% url 'list' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-success" style="margin-left: 2em; width: 7em;">LIST</a>
+        <div class="container-fluid">
+            {% load humanize %}
+
+            <table>
+                <tr>
+                    <td><h1>신규 단어 :&nbsp;</h1></td>
+                    <td style="text-align: right;"><h1>{{ new_count|intcomma }}개</h1></td>
+                </tr>
+                <tr>
+                    <td><h1>복습 단어 :&nbsp;</h1></td>
+                    <td style="text-align: right;"><h1>{{ remain_count|intcomma }}개</h1></td>
+                </tr>
+            </table>
+
+            <div class="text-center" style="margin-top: 10em;">
+                <a href="{% url 'do_next' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="width: 7em;">다음단계</a>
+                {% if remain_count > 0 %}
+                <a href="{% url 'do_review' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="margin-left:1em; width: 7em;">복습하기</a>
+                {% endif %}
+                <!-- <a href="{% url 'list' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-success" style="margin-left: 2em; width: 7em;">LIST</a> -->
                 <!-- <a href="{% url 'new_words' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-danger" style="margin-left: 2em; width: 7em;">NEW</a> -->
             </div>
         </div>
