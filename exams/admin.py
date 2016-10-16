@@ -4,18 +4,11 @@ from django.contrib import admin
 from django.forms import ModelForm
 from django.utils import timezone
 
-from exams.models import Book, Word, Memory, User, Statistics, Study
+from exams.models import Book, Word, Memory, Statistics, Study
 
 
 def local_time(value: datetime):
     return timezone.localtime(value)
-
-
-@admin.register(User)
-class WordAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'create_dt')
-    list_display_links = ('name',)
-    ordering = ['-create_dt']
 
 
 @admin.register(Book)

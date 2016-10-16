@@ -1,5 +1,7 @@
-from datetime import timedelta, datetime
+from datetime import timedelta
 
+from django.contrib.auth import get_user
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpRequest, Http404
 from django.shortcuts import render, get_object_or_404, redirect
@@ -9,8 +11,10 @@ from exams.exam import Exam
 from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes, Word
 
 
+@login_required
 def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
-    a_exam = Exam(book_id=book_id, exam_type=exam_type)
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
     study = a_exam.get_random_memory()
     if study is None:
@@ -48,6 +52,7 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     return render(request, 'exam.html', context)
 
 
+@login_required
 def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
     a_exam.sync_memories()
     count_test_words = a_exam.count_unlocked_words()
@@ -64,8 +69,10 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
     return render(request, 'start.html', context)
 
 
+@login_required
 def do_start(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
-    a_exam = Exam(book_id=book_id, exam_type=exam_type)
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
     a_exam.sync_memories()
     count_test_words = a_exam.count_unlocked_words()
@@ -86,8 +93,10 @@ def __get_statistics(memory: Memory) -> Statistics:
                           type=memory.type, step=memory.step, status=memory.status)
 
 
+@login_required
 def list_page(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
-    a_exam = Exam(book_id=book_id, exam_type=exam_type)
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
     unlocked_memories = a_exam.unlocked_memories()
     if len(unlocked_memories) <= 0:
@@ -101,8 +110,10 @@ def list_page(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpR
     return render(request, 'list.html', context)
 
 
+@login_required
 def new_words(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
-    a_exam = Exam(book_id=book_id, exam_type=exam_type)
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
     words = a_exam.new_or_wrong_words()
 
@@ -114,6 +125,7 @@ def new_words(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpR
     return render(request, 'list.html', context)
 
 
+@login_required
 def aware(request: HttpRequest, study_id: int) -> HttpResponse:
     study = get_object_or_404(Study, pk=study_id)    # type: Memory
     memory = study.memory
@@ -160,6 +172,7 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
     return redirect('exam', book_id=memory.book.id, exam_type=memory.type)
 
 
+@login_required
 def forgot(request: HttpRequest, study_id: int) -> HttpResponse:
     study = get_object_or_404(Study, pk=study_id)    # type: Study
     memory = study.memory

@@ -36,6 +36,14 @@
             display: flex;
             align-items: center;
         }
+
+        .header-desc {
+            position: absolute;
+            right: 2em;
+            top: 1em;
+            padding-left: 2em;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +51,15 @@
         <div class="container">
             <h1 class="text-center">お疲れ様でした</h1>
         </div>
+    </div>
+
+    <div class="text-muted header-desc">
+        <small>
+            Welcome, <b>{{ user.last_name }} {{ user.first_name }}</b>.
+            <a href="{% url 'password_change' %}">Change password</a>
+            /
+            <a href="{% url 'logout' %}">Log out</a>
+        </small>
     </div>
 </body>
 </html>

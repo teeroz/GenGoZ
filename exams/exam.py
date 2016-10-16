@@ -1,9 +1,10 @@
 from typing import List
 
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from exams.models import Book, Memory, Study, User, Word, ExamTypes, MemoryStatus
+from exams.models import Book, Memory, Study, Word, ExamTypes, MemoryStatus
 
 
 class Exam:
@@ -14,10 +15,7 @@ class Exam:
     def __init__(self, exam_type: ExamTypes, user: User = None, book: Book = None, book_id: int = 0):
         self.type = exam_type
 
-        if user:
-            self.user = user
-        else:
-            self.user = User.objects.get(pk=1)
+        self.user = user
 
         if book:
             self.book = book

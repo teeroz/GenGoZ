@@ -15,8 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.auth.views import login, password_change, logout, password_change_done
 
 urlpatterns = [
     url(r'^exams/', include('exams.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^login$', login, {'template_name': 'admin/login.html'}, name='login'),
+    url(r'^logout$', logout, {'next_page': '/exams/1/w'}, name='logout'),
+    url(r'^password_change$', password_change, {'template_name': 'registration/password_change_form.html'}, name='password_change'),
+    url(r'^password_change_done$', password_change_done, {'template_name': 'registration/password_change_done.html'}, name='password_change_done'),
 ]

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -10,15 +11,6 @@ EXAM_TYPES = (
     (ExamTypes.Word, 'Word'),
     (ExamTypes.Meaning, 'Meaning'),
 )
-
-
-class User(models.Model):
-    name = models.CharField(max_length=32, unique=True)
-    create_dt = models.DateTimeField(auto_now_add=True)
-    modify_dt = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Book(models.Model):
