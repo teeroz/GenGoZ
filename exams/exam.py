@@ -37,21 +37,9 @@ class Exam:
                              .exclude(status=MemoryStatus.Aware)\
                              .order_by('word__id')
 
-    def __last_created_memory(self):
-        memories = self.book.memory_set.filter(user=self.user, type=self.type).order_by('-word__id')[:1]
-
-        if len(memories) <= 0:
-            return None
-
-        return memories[0]
-
     def __queryset_words_to_add(self):
-        last_memory = self.__last_created_memory()
-
-        if last_memory is None:
-            words_to_add = self.book.word_set.filter()
-        else:
-            words_to_add = self.book.word_set.filter(id__gt=last_memory.word.id)
+        memory_word_id_list = self.book.memory_set.filter(user=self.user, type=self.type).values_list('word__id')
+        words_to_add = self.book.word_set.exclude(id__in=memory_word_id_list)
 
         return words_to_add
 
@@ -59,6 +47,8 @@ class Exam:
         words_to_add = self.__queryset_words_to_add()
         if count > 0:
             words_to_add = words_to_add.order_by('id')[:count]
+        elif count < 0:
+            words_to_add = words_to_add.order_by('-id')[:count*-1]
 
         for word in words_to_add:   # type: Word
             assert isinstance(word, Word)

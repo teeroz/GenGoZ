@@ -76,7 +76,10 @@ def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRes
     user = get_user(request)
     a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
-    a_exam.sync_memories(20)
+    if user.username == 'kaien':
+        a_exam.sync_memories(-20)
+    else:
+        a_exam.sync_memories(20)
     count_test_words = a_exam.count_unlocked_words()
     if count_test_words <= 0:
         return start(request, a_exam)
