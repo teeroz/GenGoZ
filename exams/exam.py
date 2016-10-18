@@ -1,6 +1,7 @@
 from typing import List
 
 from django.contrib.auth.models import User
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -97,3 +98,19 @@ class Exam:
             study.word = memory.word
             study.memory = memory
             study.save()
+
+    def __count_group_by_step(self):
+        count_by_step = self.book.memory_set.filter(user=self.user, type=self.type)\
+            .values('step').annotate(total=Count('step')).order_by('step')
+        retval = {}
+        for row in count_by_step:
+            retval[row['step']] = row['total']
+        return retval
+
+    def get_study_score(self):
+        count_by_step = self.__count_group_by_step()
+        score = 0
+        for step, total in count_by_step.items():
+            score += (step * total) / 5.
+
+        return score

@@ -59,6 +59,7 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
     count_test_words = a_exam.count_unlocked_words()
     if count_test_words <= 0 and count_new_words <= 0:
         return render(request, 'finish.html')
+    study_score = a_exam.get_study_score()
 
     context = {
         'exam': a_exam,
@@ -66,6 +67,7 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
         'exam_type': a_exam.type,
         'new_count': count_new_words,
         'remain_count': count_test_words,
+        'study_score': int(study_score),
     }
 
     return render(request, 'start.html', context)
