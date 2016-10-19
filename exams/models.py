@@ -105,7 +105,7 @@ class Memory(models.Model):
         )
 
     def __str__(self):
-        return self.user.name + ':' + self.book.title + ':' + self.word.word + ':' + self.type
+        return self.user.username + ':' + self.book.title + ':' + self.word.word + ':' + self.type
 
     def question(self) -> str:
         if self.type == ExamTypes.Meaning:
