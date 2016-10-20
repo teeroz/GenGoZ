@@ -78,7 +78,7 @@ def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRes
     user = get_user(request)
     a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
 
-    if user.username == 'kaien':
+    if user.username == 'kaien' or user.username == 'taek':
         a_exam.sync_memories(-20)
     else:
         a_exam.sync_memories(20)
