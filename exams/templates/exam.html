@@ -41,7 +41,7 @@
             }
 
             $('.kanzi').click(function (event) {
-                window.location.href = '{% url 'search' book_id %}?k=' + $(this).text();
+                window.open('{% url 'search' book_id %}?k=' + $(this).text(), '_blank');
             });
         });
     </script>
