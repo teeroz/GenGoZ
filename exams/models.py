@@ -1,4 +1,7 @@
+import re
+
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 
 
@@ -44,15 +47,28 @@ class Word(models.Model):
             ('book', 'create_dt'),
         )
 
+    def word_with_link(self):
+        return re.sub(r'([\u4e00-\u9fff])', r'<span class="kanzi">\1</span>', self.word)
+
+    def example_with_link(self):
+        return re.sub(r'([\u4e00-\u9fff]+)', r'<span class="kanzi">\1</span>', self.example_jp)
+
+    def example_jp_with_tag(self):
+        return self.example_jp.replace('[', '<code>').replace(']', '</code>')
+
+    def example_kr_with_tag(self):
+        return self.example_kr.replace('[', '<code>').replace(']', '</code>')
+
     def get_absolute_url(self):
-        return 'http://jpdic.naver.com/entry/jk/%s.nhn' % self.naver_link
+        if self.naver_link:
+            return 'http://jpdic.naver.com/entry/jk/%s.nhn' % self.naver_link
+        else:
+            return 'http://jpdic.naver.com/search.nhn?range=word&page=1&q=%s' % self.word
 
     def string_with_link(self):
         content = '%s(%s)' % (self.word, self.meaning)
-        if self.naver_link:
-            html = '<a href="%s" target="_blank">%s</a>' % (self.get_absolute_url(), content)
-        else:
-            html = content
+        # html = '<a href="%s" target="_blank">%s</a>' % (self.get_absolute_url(), content)
+        html = '<a href="%s">%s</a>' % (reverse('detail', args=[self.id]), content)
         return html
 
     def related_terms(self) -> str:

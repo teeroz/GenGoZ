@@ -26,31 +26,13 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
+
+    {% block head %}{% endblock %}
 </head>
+
 <body>
-<div>
-    <div class="container" style="margin-top: 3em; margin-bottom: 2em;">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>문제</th>
-                    <th>발음</th>
-                    <th>정답</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for memory in memories %}
-                <tr>
-                    <td>{{ memory.question }}</td>
-                    <td>{{ memory.word.pronunciation }}</td>
-                    <td>{{ memory.answer }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    {% block body %}{% endblock %}
 
     {% include 'user-section.html' %}
-</div>
 </body>
 </html>

@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
 from exams.exam import Exam
-from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes, Word
+from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes, Word, Book
 
 
 @login_required
@@ -25,15 +25,15 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     word = study.word   # type: Word
 
     if exam_type == ExamTypes.Word:
-        question = study.word.word     # type: str
-        question_ex = word.example_jp  # type: str
-        answer = study.word.meaning    # type: str
-        answer_ex = word.example_kr    # type: str
+        question = study.word.word_with_link()  # type: str
+        question_ex = word.example_with_link()  # type: str
+        answer = study.word.meaning             # type: str
+        answer_ex = word.example_kr             # type: str
     elif exam_type == ExamTypes.Meaning:
-        question = study.word.meaning  # type: str
-        question_ex = word.example_kr  # type: str
-        answer = study.word.word       # type: str
-        answer_ex = word.example_jp  # type: str
+        question = study.word.meaning           # type: str
+        question_ex = word.example_kr           # type: str
+        answer = study.word.word_with_link()    # type: str
+        answer_ex = word.example_with_link()    # type: str
     else:
         raise Http404('Invalid Exam-Type.')
 
@@ -41,6 +41,7 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     answer_ex = answer_ex.replace('[', '<code>').replace(']', '</code>')
 
     context = {
+        'book_id': book_id,
         'study': study,
         'question': question,
         'question_ex': question_ex,
@@ -50,6 +51,17 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     }
 
     return render(request, 'exam.html', context)
+
+
+@login_required
+def detail_page(request: HttpRequest, word_id: int) -> HttpResponse:
+    word = get_object_or_404(Word, pk=word_id)
+
+    context = {
+        'word': word,
+    }
+
+    return render(request, 'detail.html', context)
 
 
 @login_required
@@ -130,6 +142,19 @@ def list_page(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpR
     }
 
     return render(request, 'list.html', context)
+
+
+@login_required
+def search_page(request: HttpRequest, book_id: int) -> HttpResponse:
+    book = get_object_or_404(Book, pk=book_id)
+    keyword = request.GET['k']
+    words = book.word_set.filter(word__contains=keyword).order_by('pronunciation')
+
+    context = {
+        'words': words
+    }
+
+    return render(request, 'search.html', context)
 
 
 @login_required

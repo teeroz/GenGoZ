@@ -1,32 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>GenGoZ Exam</title>
+{% extends 'base.html' %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <script src="https://code.jquery.com/jquery-2.2.3.min.js"
-            integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
-            crossorigin="anonymous"></script>
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
-          crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
-          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
-          crossorigin="anonymous">
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-            crossorigin="anonymous"></script>
-
+{% block head %}
     <script>
         $(function () {
 
@@ -59,12 +33,16 @@
             }
 
             function aware() {
-                window.location.href = '{% url 'aware' study.id %}'
+                window.location.href = '{% url 'aware' study.id %}';
             }
 
             function forgot() {
-                window.location.href = '{% url 'forgot' study.id %}'
+                window.location.href = '{% url 'forgot' study.id %}';
             }
+
+            $('.kanzi').click(function (event) {
+                window.location.href = '{% url 'search' book_id %}?k=' + $(this).text();
+            });
         });
     </script>
 
@@ -78,28 +56,29 @@
             align-items: center;
         }
 
-        .header-desc {
-            position: absolute;
-            right: 2em;
-            top: 1em;
-            padding-left: 2em;
-            text-align: right;
-        }
-
         .footer-desc {
             position: absolute;
-            right: 2em;
+            right: 15px;
             bottom: 1.5em;
             padding-left: 2em;
             text-align: right;
         }
+
+        .kanzi {
+            cursor: pointer;
+        }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
     <div class="vertical-center">
         <div class="container">
             <div>
-                <h1 class="text-center">{{ question }}</h1>
+                <h1 class="text-center">
+                    {% autoescape off %}
+                    {{ question }}
+                    {% endautoescape %}
+                </h1>
             </div>
             <div>
                 {% autoescape off %}
@@ -110,7 +89,11 @@
             <div id="answer" class="text-center invisible" style="margin-top:3em;">
                 <div>
                     <h2 class="text-primary">
-                        <div>{{ answer }}</div>
+                        <div>
+                            {% autoescape off %}
+                            {{ answer }}
+                            {% endautoescape %}
+                        </div>
                         {% if study.word.pronunciation %}
                         <div style="margin-top: 0em;"><small>[{{ study.word.pronunciation }}]</small></div>
                         {% endif %}
@@ -132,15 +115,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="text-muted header-desc">
-        <small>
-            Welcome, <b>{{ user.last_name }} {{ user.first_name }}</b>.
-            <a href="{% url 'password_change' %}">Change password</a>
-            /
-            <a href="{% url 'logout' %}">Log out</a>
-        </small>
     </div>
 
     <div id="status" class="text-muted footer-desc">
@@ -172,5 +146,4 @@
             {% endautoescape %}
         </small>
     </div>
-</body>
-</html>
+{% endblock %}

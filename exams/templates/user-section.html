@@ -1,0 +1,18 @@
+<style>
+    .header-desc {
+        position: absolute;
+        right: 15px;
+        top: 1em;
+        padding-left: 2em;
+        text-align: right;
+    }
+</style>
+
+<div class="text-muted header-desc">
+    <small>
+        <!--Welcome, <b>{{ user.last_name }} {{ user.first_name }}</b>.-->
+        <a href="{% url 'password_change' %}">password</a>
+        /
+        <a href="{% url 'logout' %}">logout</a>
+    </small>
+</div>

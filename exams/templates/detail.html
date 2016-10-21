@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <script>
+        $(function () {
+
+            $('#viewButton').on('click', function () {
+                window.location.href = '{% autoescape off %}{{ word.get_absolute_url }}{% endautoescape %}';
+            });
+        });
+    </script>
+
+    <style>
+        .vertical-center {
+            min-width: 100%;
+            min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+            min-height: 100vh; /* These two lines are counted as one :-)       */
+
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-desc {
+            position: absolute;
+            right: 15px;
+            bottom: 1.5em;
+            padding-left: 2em;
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="vertical-center">
+        <div class="container">
+            <h1 class="text-center" style="margin-bottom: 0px;">
+                {{ word.word }}
+            </h1>
+            {% if word.pronunciation %}
+            <h2 class="text-center" style="margin-top: 0px;">
+                <small>[{{ word.pronunciation }}]</small>
+            </h2>
+            {% endif %}
+            <h2 class="text-center text-primary" style="margin-top: 30px;">
+                {{ word.meaning }}
+            </h2>
+
+            <div class="text-center" style="margin-top: 40px;">
+                <div>
+                    {% autoescape off %}
+                    <h4 class="text-muted">{{ word.example_jp_with_tag }}</h4>
+                    {% endautoescape %}
+                </div>
+                <div>
+                    {% autoescape off %}
+                    <h4 class="text-muted">{{ word.example_kr_with_tag }}</h4>
+                    {% endautoescape %}
+                </div>
+            </div>
+            <div style="margin-top: 5em; margin-bottom: 3em;">
+                <div class="text-center">
+                    <button id="viewButton" class="btn btn-lg btn-success" type="button">View on naver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="related_terms" class="text-muted footer-desc">
+        <small>
+            {% autoescape off %}
+            {{ word.string_with_link }}
+            {% if word.related.all %}
+                / [관]
+                {% for rword in word.related.all %}
+                    {{ rword.string_with_link }}
+                {% endfor %}
+            {% endif %}
+            {% if word.synonym.all %}
+                / [유]
+                {% for rword in word.synonym.all %}
+                    {{ rword.string_with_link }}
+                {% endfor %}
+            {% endif %}
+            {% if word.antonym.all %}
+                / [반]
+                {% for rword in word.antonym.all %}
+                    {{ rword.string_with_link }}
+                {% endfor %}
+            {% endif %}
+            {% endautoescape %}
+        </small>
+    </div>
+
+    {% include 'back.html' %}
+{% endblock %}
