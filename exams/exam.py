@@ -41,6 +41,8 @@ class Exam:
     def __queryset_words_to_add(self):
         memory_word_id_list = self.book.memory_set.filter(user=self.user, type=self.type).values_list('word__id')
         words_to_add = self.book.word_set.exclude(id__in=memory_word_id_list)
+        if self.type == ExamTypes.Meaning:
+            words_to_add = words_to_add.exclude(skip_meaning=True)
 
         return words_to_add
 
@@ -67,14 +69,19 @@ class Exam:
     def get_random_memory(self) -> Word:
         while True:
             # return Memory.objects.get(pk=1540)
-            study_words = Study.objects.filter(user=self.user, word__book=self.book, type=self.type).order_by('id')[:1]
+            study_words = Study.objects.select_related('memory', 'word')\
+                .filter(user=self.user, word__book=self.book, type=self.type).order_by('id')[:1]
             if len(study_words) <= 0:
                 return None
             study_word = study_words[0]    # type: Memory
 
-            if study_word.book != study_word.word.book:
+            if study_word.book_id != study_word.word.book_id:
                 study_word.book = study_word.word.book
                 study_word.save()
+
+            if self.type == ExamTypes.Meaning and study_word.word.skip_meaning:
+                study_word.memory.delete()
+                continue
 
             return study_word
 
