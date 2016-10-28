@@ -104,6 +104,9 @@
                     <h4 class="text-muted">{{ answer_ex }}</h4>
                     {% endautoescape %}
                 </div>
+                {% if note %}
+                <p class="text-danger" style="margin-top:2em;"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> {{ note }}</p>
+                {% endif %}
             </div>
             <div style="margin-top: 5em; margin-bottom: 3em;">
                 <div id="questionPhase" class="text-center">

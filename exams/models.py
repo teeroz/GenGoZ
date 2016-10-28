@@ -33,6 +33,7 @@ class Word(models.Model):
     meaning = models.CharField(max_length=256)
     example_jp = models.CharField(max_length=256, blank=True)
     example_kr = models.CharField(max_length=256, blank=True)
+    note = models.CharField(max_length=256, blank=True)
     naver_link = models.CharField(max_length=256, blank=True)
     skip_meaning = models.BooleanField(default=False)
     create_dt = models.DateTimeField(auto_now_add=True)

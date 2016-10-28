@@ -56,6 +56,10 @@
                     <h4 class="text-muted">{{ word.example_kr_with_tag }}</h4>
                     {% endautoescape %}
                 </div>
+
+                {% if word.note %}
+                <p class="text-danger" style="margin-top:2em;"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> {{ word.note }}</p>
+                {% endif %}
             </div>
             <div style="margin-top: 5em; margin-bottom: 3em;">
                 <div class="text-center">

@@ -48,6 +48,7 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
         'answer': answer,
         'answer_ex': answer_ex,
         'remain_count': count_test_words,
+        'note': word.note,
     }
 
     return render(request, 'exam.html', context)
