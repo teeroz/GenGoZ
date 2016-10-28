@@ -65,6 +65,11 @@ class Word(models.Model):
         else:
             return 'http://jpdic.naver.com/search.nhn?range=word&page=1&q=%s' % self.word
 
+    def string_with_naver_link(self):
+        content = '%s(%s)' % (self.word, self.meaning)
+        html = '<a href="%s" target="_blank">%s</a>' % (self.get_absolute_url(), 'View on Naver')
+        return html
+
     def string_with_link(self):
         content = '%s(%s)' % (self.word, self.meaning)
         # html = '<a href="%s" target="_blank">%s</a>' % (self.get_absolute_url(), content)

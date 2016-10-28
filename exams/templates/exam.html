@@ -124,7 +124,7 @@
     <div id="related_terms" class="text-muted hidden footer-desc">
         <small>
             {% autoescape off %}
-            {{ study.word.string_with_link }}
+            {{ study.word.string_with_naver_link }}
             {% if study.word.related.all %}
                 / [관]
                 {% for word in study.word.related.all %}
