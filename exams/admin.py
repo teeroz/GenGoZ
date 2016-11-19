@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib import admin
+from django.contrib.auth import get_user
 from django.forms import ModelForm
 from django.utils import timezone
 
@@ -30,7 +31,10 @@ class WordModelForm(ModelForm):
         if instance:
             book = instance.book
         else:
-            book = Word.objects.order_by('-create_dt')[0].book
+            if self.current_user.username == 'kaien':
+                book = Book.objects.get(pk=6)
+            else:
+                book = Book.objects.get(pk=1)
             kwargs['initial'] = {'book': book}
 
         ModelForm.__init__(self, *args, **kwargs)
@@ -44,9 +48,27 @@ class WordModelForm(ModelForm):
         self.fields['antonym'].queryset = queryset
 
 
+def __copy_word(word: Word, book: Book):
+    is_exist = Word.objects.filter(book=book, word=word.word).count() > 0
+    if is_exist:
+        return
+
+    word.pk = None
+    word.book = book
+    word.save()
+
+
+def copy_words(modeladmin, request, queryset):
+    kaien_book = Book.objects.get(pk=6)
+
+    for word in queryset:
+        __copy_word(word, kaien_book)
+copy_words.short_description = 'Copy words to kaien words'
+
+
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
-    list_display = ('id', 'book', 'word', 'meaning', 'related_terms', 'naver_link', 'created_at')
+    list_display = ('id', 'book', 'word', 'meaning', 'related_terms', 'created_at')
     list_display_links = ('word',)
     list_filter = ('book',)
     filter_horizontal = ('related', 'synonym', 'antonym')
@@ -56,6 +78,12 @@ class WordAdmin(admin.ModelAdmin):
     list_select_related = ('book',)
     save_on_top = True
     form = WordModelForm
+    actions = [copy_words]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(WordAdmin, self).get_form(request, obj, **kwargs)
+        form.current_user = request.user
+        return form
 
     @staticmethod
     def created_at(obj: Memory) -> str:
