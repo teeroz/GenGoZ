@@ -100,6 +100,7 @@ class MemoryAdmin(admin.ModelAdmin):
     preserve_filters = True
     save_on_top = True
     list_select_related = ('user', 'book', 'word')
+    search_fields = ('word__word', 'word__pronunciation', 'word__meaning')
 
     @staticmethod
     def word_title(obj: Memory) -> str:

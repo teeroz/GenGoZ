@@ -209,8 +209,8 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
         # 내일 다시 테스트한다
         memory.unlock_dt = timezone.now() + timedelta(hours=16)
 
-        # 한번이라도 틀리면 스텝0부터 다시 시작한다
-        memory.step = 0
+        # 한번이라도 틀리면 스텝1부터 다시 시작한다
+        memory.step = 1
 
     memory.group_level = 0
     memory.save()
