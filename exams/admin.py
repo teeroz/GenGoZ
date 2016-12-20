@@ -68,7 +68,7 @@ copy_words.short_description = 'Copy words to kaien words'
 
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
-    list_display = ('id', 'book', 'word', 'meaning', 'related_terms', 'created_at')
+    list_display = ('id', 'book', 'word', 'meaning', 'trends', 'related_terms', 'created_at')
     list_display_links = ('word',)
     list_filter = ('book',)
     filter_horizontal = ('related', 'synonym', 'antonym')
