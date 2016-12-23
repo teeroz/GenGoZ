@@ -41,7 +41,7 @@ class Word(models.Model):
     related = models.ManyToManyField("self", symmetrical=True, blank=True)
     synonym = models.ManyToManyField("self", symmetrical=True, blank=True)
     antonym = models.ManyToManyField("self", symmetrical=True, blank=True)
-    trends = models.IntegerField(null=True)
+    trends = models.IntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = ('book', 'word')

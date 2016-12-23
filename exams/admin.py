@@ -5,7 +5,7 @@ from django.contrib.auth import get_user
 from django.forms import ModelForm
 from django.utils import timezone
 
-from exams.models import Book, Word, Memory, Statistics, Study
+from exams.models import Book, Word, Memory, Statistics, Study, MemoryStatus, ExamTypes
 
 
 def local_time(value: datetime):
@@ -66,6 +66,31 @@ def copy_words(modeladmin, request, queryset):
 copy_words.short_description = 'Copy words to kaien words'
 
 
+def __change_to_initial_step(memory: Memory):
+    memory.step = 1
+    memory.unlock_dt = timezone.now()
+    memory.status = MemoryStatus.Forgot
+    memory.group_level = 0
+    memory.forgot_cnt += 1
+    memory.save()
+
+
+def forgot_meaning(modeladmin, request, queryset):
+    for word in queryset:
+        memory = Memory.objects.get(word=word, type=ExamTypes.Meaning)
+        __change_to_initial_step(memory)
+
+forgot_meaning.short_description = 'Change meaning to initial step'
+
+
+def forgot_word(modeladmin, request, queryset):
+    for word in queryset:
+        memory = Memory.objects.get(word=word, type=ExamTypes.Word)
+        __change_to_initial_step(memory)
+
+forgot_word.short_description = 'Change word to initial step'
+
+
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
     list_display = ('id', 'book', 'word', 'meaning', 'trends', 'related_terms', 'created_at')
@@ -78,7 +103,7 @@ class WordAdmin(admin.ModelAdmin):
     list_select_related = ('book',)
     save_on_top = True
     form = WordModelForm
-    actions = [copy_words]
+    actions = [forgot_meaning, forgot_word, copy_words]
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(WordAdmin, self).get_form(request, obj, **kwargs)
@@ -88,6 +113,13 @@ class WordAdmin(admin.ModelAdmin):
     @staticmethod
     def created_at(obj: Memory) -> str:
         return local_time(obj.create_dt).strftime('%m.%d %H:%M')
+
+
+def forgot_memory(modeladmin, request, queryset):
+    for memory in queryset:
+        __change_to_initial_step(memory)
+
+forgot_memory.short_description = 'Change to initial step'
 
 
 @admin.register(Memory)
@@ -101,6 +133,7 @@ class MemoryAdmin(admin.ModelAdmin):
     save_on_top = True
     list_select_related = ('user', 'book', 'word')
     search_fields = ('word__word', 'word__pronunciation', 'word__meaning')
+    actions = [forgot_memory]
 
     @staticmethod
     def word_title(obj: Memory) -> str:
