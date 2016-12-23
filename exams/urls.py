@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^new_words/(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.new_words, name='new_words'),
     url(r'^search/(?P<book_id>[0-9]+)$', views.search_page, name='search'),
     url(r'^detail/(?P<word_id>[0-9]+)$', views.detail_page, name='detail'),
+    url(r'^reset_meaning/(?P<study_id>[0-9]+)$', views.reset_meaning, name='reset_meaning'),
 ]

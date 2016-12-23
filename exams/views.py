@@ -4,6 +4,7 @@ from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpRequest, Http404
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
@@ -29,11 +30,16 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
         question_ex = word.example_with_link()  # type: str
         answer = study.word.meaning             # type: str
         answer_ex = word.example_kr             # type: str
+        if user.username == 'teeroz':
+            can_reset_meaning = True            # type: bool
+        else:
+            can_reset_meaning = False           # type: bool
     elif exam_type == ExamTypes.Meaning:
         question = study.word.meaning           # type: str
         question_ex = word.example_kr           # type: str
         answer = study.word.word_with_link()    # type: str
         answer_ex = word.example_with_link()    # type: str
+        can_reset_meaning = False               # type: bool
     else:
         raise Http404('Invalid Exam-Type.')
 
@@ -49,6 +55,7 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
         'answer_ex': answer_ex,
         'remain_count': count_test_words,
         'note': word.note,
+        'can_reset_meaning': can_reset_meaning,
     }
 
     return render(request, 'exam.html', context)
@@ -242,3 +249,17 @@ def forgot(request: HttpRequest, study_id: int) -> HttpResponse:
     study.delete()
 
     return redirect('exam', book_id=memory.book.id, exam_type=memory.type)
+
+
+@login_required
+def reset_meaning(request: HttpRequest, study_id: int) -> JsonResponse:
+    study = get_object_or_404(Study, pk=study_id)    # type: Study
+    word = study.word
+    try:
+        memory = Memory.objects.get(word=word, type=ExamTypes.Meaning)
+    except ObjectDoesNotExist:
+        return JsonResponse({'result': True})
+
+    memory.change_to_initial_step()
+
+    return JsonResponse({'result': True})

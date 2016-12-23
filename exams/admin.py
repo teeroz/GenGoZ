@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib import admin
 from django.contrib.auth import get_user
+from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelForm
 from django.utils import timezone
 
@@ -67,17 +68,15 @@ copy_words.short_description = 'Copy words to kaien words'
 
 
 def __change_to_initial_step(memory: Memory):
-    memory.step = 1
-    memory.unlock_dt = timezone.now()
-    memory.status = MemoryStatus.Forgot
-    memory.group_level = 0
-    memory.forgot_cnt += 1
-    memory.save()
+    memory.change_to_initial_step()
 
 
 def forgot_meaning(modeladmin, request, queryset):
     for word in queryset:
-        memory = Memory.objects.get(word=word, type=ExamTypes.Meaning)
+        try:
+            memory = Memory.objects.get(word=word, type=ExamTypes.Meaning)
+        except ObjectDoesNotExist:
+            continue
         __change_to_initial_step(memory)
 
 forgot_meaning.short_description = 'Change meaning to initial step'
@@ -85,7 +84,10 @@ forgot_meaning.short_description = 'Change meaning to initial step'
 
 def forgot_word(modeladmin, request, queryset):
     for word in queryset:
-        memory = Memory.objects.get(word=word, type=ExamTypes.Word)
+        try:
+            memory = Memory.objects.get(word=word, type=ExamTypes.Word)
+        except ObjectDoesNotExist:
+            continue
         __change_to_initial_step(memory)
 
 forgot_word.short_description = 'Change word to initial step'

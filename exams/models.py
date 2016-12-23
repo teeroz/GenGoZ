@@ -3,6 +3,7 @@ import re
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils import timezone
 
 
 class ExamTypes:
@@ -142,6 +143,14 @@ class Memory(models.Model):
             return self.word.word
         elif self.type == ExamTypes.Word:
             return self.word.meaning
+
+    def change_to_initial_step(self):
+        self.step = 1
+        self.unlock_dt = timezone.now()
+        self.status = MemoryStatus.Forgot
+        self.group_level = 0
+        self.forgot_cnt += 1
+        self.save()
 
 
 class Statistics(models.Model):

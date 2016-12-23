@@ -7,6 +7,7 @@
             $('#showButton').on('click', show);
             $('#awareButton').on('click', aware);
             $('#forgotButton').on('click', forgot);
+            $('.resetMeaning').on('click', resetMeaning);
 
             $(document).keyup(function (event) {
                 if ($('#answer').hasClass('invisible')) {
@@ -38,6 +39,20 @@
 
             function forgot() {
                 window.location.href = '{% url 'forgot' study.id %}';
+            }
+
+            function resetMeaning() {
+                if (confirm('이 단어의 뜻에 해당하는 학습을 초기 상태로 변경하시겠습니까?')) {
+                    $.getJSON('{% url 'reset_meaning' study.id %}', function (data) {
+                        if (data.result) {
+                            alert('초기 상태로 변경되었습니다.');
+                            return;
+                        }
+                    })
+                    .fail(function () {
+                        alert('알 수 없는 오류가 발생하였습니다.');
+                    });
+                }
             }
 
             $('.kanzi').click(function (event) {
@@ -95,7 +110,9 @@
                             {% endautoescape %}
                         </div>
                         {% if study.word.pronunciation %}
-                        <div style="margin-top: 0em;"><small>[{{ study.word.pronunciation }}]</small></div>
+                        <div style="margin-top: 0em;">
+                            <small {% if can_reset_meaning %} class="resetMeaning" {% endif %}>[{{ study.word.pronunciation }}]</small>
+                        </div>
                         {% endif %}
                     </h2>
                 </div>
