@@ -74,12 +74,18 @@ def detail_page(request: HttpRequest, word_id: int) -> HttpResponse:
 
 @login_required
 def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
+    user = get_user(request)
     # a_exam.sync_memories()
     count_new_words = a_exam.count_new_words()
     count_test_words = a_exam.count_unlocked_words()
     if count_test_words <= 0 and count_new_words <= 0:
         return render(request, 'finish.html')
     study_score = a_exam.get_study_score()
+
+    if user.username == 'teeroz':
+        include_random_memories = True
+    else:
+        include_random_memories = False
 
     context = {
         'exam': a_exam,
@@ -88,6 +94,7 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
         'new_count': count_new_words,
         'remain_count': count_test_words,
         'study_score': int(study_score),
+        'include_random_memories': include_random_memories,
     }
 
     return render(request, 'start.html', context)
@@ -100,13 +107,18 @@ def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRes
 
     if user.username == 'kaien' or user.username == 'taek':
         a_exam.sync_memories(-20)
+    elif user.username == 'teeroz':
+        a_exam.sync_memories()
     else:
         a_exam.sync_memories(20)
     count_test_words = a_exam.count_unlocked_words()
     if count_test_words <= 0:
         return start(request, a_exam)
 
-    a_exam.generate_study()
+    if user.username == 'teeroz':
+        a_exam.generate_study(include_random_memories=True)
+    else:
+        a_exam.generate_study()
 
     return redirect('exam', book_id=a_exam.book.id, exam_type=a_exam.type)
 
@@ -201,10 +213,14 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
             memory.unlock_dt = timezone.now() + timedelta(days=28)
         elif memory.step == 3:
             memory.unlock_dt = timezone.now() + timedelta(days=28*3)
-        elif memory.step == 4:
+        elif memory.step >= 4:
             memory.unlock_dt = timezone.now() + timedelta(days=365)
         memory.unlock_dt = memory.unlock_dt - timedelta(hours=8)
-        memory.step += 1
+        if memory.step <= 4:
+            memory.step += 1
+        else:
+            if memory.forgot_cnt > 0:
+                memory.forgot_cnt -= 1
 
         # 한번에 맞췄다면 이 단어는 안다고 볼 수 있다
         memory.status = MemoryStatus.Aware

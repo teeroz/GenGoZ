@@ -63,7 +63,7 @@
             </table>
 
             <div class="text-center" style="margin-top: 10em;">
-                {% if new_count > 0 %}
+                {% if new_count > 0 or include_random_memories %}
                 <a href="{% url 'do_next' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="width: 7em;">다음단계</a>
                 {% endif %}
                 {% if remain_count > 0 %}

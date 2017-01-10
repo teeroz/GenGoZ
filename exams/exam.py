@@ -1,3 +1,6 @@
+import random
+from itertools import chain
+from operator import attrgetter
 from typing import List
 
 from django.contrib.auth.models import User
@@ -28,9 +31,25 @@ class Exam:
                              .count()
 
     def unlocked_memories(self) -> List[Memory]:
-        return Memory.objects.select_related('word')\
+        return Memory.objects.select_related('word') \
                              .filter(user=self.user, book=self.book, type=self.type, unlock_dt__lte=timezone.now())\
                              .order_by('?')
+
+    def unlocked_memories_and_random_memories(self) -> List[Memory]:
+        # 일단 많이 틀리지 않았던 단어들도 골고루 나올 수 있게 충분히 많은 수를 추출한 다음에
+        random_memories = Memory.objects.select_related('word') \
+            .filter(user=self.user, book=self.book, type=self.type, step=5) \
+            .order_by('?')[:50]
+
+        # 그 중에서 forgot_cnt가 큰 10개의 단어만 추출한다
+        random_memories = sorted(random_memories, key=attrgetter('forgot_cnt'), reverse=True)[:10]
+
+        # 그 단어들을 unlock 시킨다
+        for memory in random_memories:
+            memory.unlock_dt = timezone.now()
+            memory.save()
+
+        return self.unlocked_memories()
 
     def new_or_wrong_words(self) -> List[Memory]:
         return Memory.objects.select_related('word')\
@@ -88,8 +107,11 @@ class Exam:
     def count_study_words(self) -> int:
         return Study.objects.filter(user=self.user, word__book=self.book, type=self.type).count()
 
-    def generate_study(self):
-        memories = self.unlocked_memories()
+    def generate_study(self, include_random_memories=False):
+        if include_random_memories:
+            memories = self.unlocked_memories_and_random_memories()
+        else:
+            memories = self.unlocked_memories()
 
         for memory in memories:
             assert isinstance(memory, Memory)
