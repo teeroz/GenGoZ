@@ -69,7 +69,7 @@
                 {% if new_count > 0 %}
                 <a href="{% url 'do_next' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="width: 7em; margin-right: 1em;">다음단계</a>
                 {% endif %}
-                {% if remain_count > 0 %}
+                {% if new_count <= 0 and remain_count > 0 %}
                 <a href="{% url 'do_review' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-info" style="width: 7em;">복습하기</a>
                 {% endif %}
                 <!-- <a href="{% url 'list' book_id=book_id exam_type=exam_type %}" class="btn btn-lg btn-success" style="margin-left: 2em; width: 7em;">LIST</a> -->
