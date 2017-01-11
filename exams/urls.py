@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.exam, name='exam'),
     url(r'^aware/(?P<study_id>[0-9]+)$', views.aware, name='aware'),
     url(r'^forgot/(?P<study_id>[0-9]+)$', views.forgot, name='forgot'),
+    url(r'^do_add_random/(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.do_add_random, name='do_add_random'),
     url(r'^do_next/(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.do_next, name='do_next'),
     url(r'^do_review/(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.do_review, name='do_review'),
     url(r'^list/(?P<book_id>[0-9]+)/(?P<exam_type>[wm])$', views.list_page, name='list'),

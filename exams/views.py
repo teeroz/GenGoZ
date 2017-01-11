@@ -25,6 +25,10 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
 
     word = study.word   # type: Word
 
+    if word.word == word.pronunciation:
+        word.pronunciation = ''
+        word.save()
+
     if exam_type == ExamTypes.Word:
         question = study.word.word_with_link()  # type: str
         question_ex = word.example_with_link()  # type: str
@@ -78,8 +82,10 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
     # a_exam.sync_memories()
     count_new_words = a_exam.count_new_words()
     count_test_words = a_exam.count_unlocked_words()
+    """
     if count_test_words <= 0 and count_new_words <= 0:
         return render(request, 'finish.html')
+    """
     study_score = a_exam.get_study_score()
 
     if user.username == 'teeroz':
@@ -101,6 +107,15 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
 
 
 @login_required
+def do_add_random(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
+    user = get_user(request)
+    a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
+    a_exam.add_random_memories()
+
+    return redirect('exam', book_id=a_exam.book.id, exam_type=a_exam.type)
+
+
+@login_required
 def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
     user = get_user(request)
     a_exam = Exam(book_id=book_id, exam_type=exam_type, user=user)
@@ -115,10 +130,7 @@ def do_next(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRes
     if count_test_words <= 0:
         return start(request, a_exam)
 
-    if user.username == 'teeroz':
-        a_exam.generate_study(include_random_memories=True)
-    else:
-        a_exam.generate_study()
+    a_exam.generate_study()
 
     return redirect('exam', book_id=a_exam.book.id, exam_type=a_exam.type)
 

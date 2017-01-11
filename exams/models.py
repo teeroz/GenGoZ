@@ -109,6 +109,8 @@ MEMORY_STATUS = (
 
 
 class Memory(models.Model):
+    LastStep = 5
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)    # type: User
     book = models.ForeignKey(Book, on_delete=models.CASCADE)    # type: Book
     word = models.ForeignKey(Word, on_delete=models.CASCADE)    # type: Word
