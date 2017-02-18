@@ -242,7 +242,8 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
     # 두번째 이후에 맞췄다면
     else:
         # 내일 다시 테스트한다
-        memory.unlock_dt = timezone.now() + timedelta(hours=16)
+        memory.unlock_dt = timezone.now() + timedelta(days=1)
+        memory.unlock_dt = datetime.combine(memory.unlock_dt.date(), time(hour=4))
 
         # 한번이라도 틀리면 스텝1부터 다시 시작한다
         memory.step = 1
