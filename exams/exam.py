@@ -3,6 +3,7 @@ from itertools import chain
 from operator import attrgetter
 from typing import List
 
+from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -39,8 +40,9 @@ class Exam:
         number_of_candidate = 50
 
         # 일단 많이 틀리지 않았던 단어들도 골고루 나올 수 있게 충분히 많은 수를 추출한 다음에
+        four_weeks_ago = timezone.now() - timedelta(days=28)
         random_memories = Memory.objects.select_related('word') \
-                              .filter(user=self.user, book=self.book, type=self.type, step=Memory.LastStep) \
+                              .filter(user=self.user, book=self.book, type=self.type, step=Memory.LastStep, modify_dt__lte=four_weeks_ago) \
                               .order_by('?')[:number_of_candidate]
 
         # 그 중에서 forgot_cnt가 큰 number개의 단어만 추출한다
