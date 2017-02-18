@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 
 from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
@@ -227,7 +227,7 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
             memory.unlock_dt = timezone.now() + timedelta(days=28*3)
         elif memory.step >= 4:
             memory.unlock_dt = timezone.now() + timedelta(days=365)
-        memory.unlock_dt = memory.unlock_dt - timedelta(hours=8)
+        memory.unlock_dt = datetime.combine(memory.unlock_dt.date(), time(hour=4))
         if memory.step <= 4:
             memory.step += 1
         else:
