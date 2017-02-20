@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime, time
+from datetime import timedelta, datetime
 
 from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
@@ -204,6 +204,20 @@ def new_words(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpR
     return render(request, 'list.html', context)
 
 
+def _normalize_date(a_datetime: datetime) -> datetime:
+    """
+    a_datetime을 4시간 이전 날짜의 새벽 4시 시각으로 변경한다.
+    복습으로 다시 나오는 시각을 다음날 새벽 4시로 고정하기 위하여 사용한다.
+    자정부터 새벽 4시까지 학습한 경우에는 잠들기 전에 학습한 것으로 간주하여 그 날 새벽 4시에 나오도록 한다.
+    :param a_datetime:
+    :return:
+    """
+    result = a_datetime.astimezone(tz=None)
+    result = result - timedelta(hours=4)
+    result = datetime(result.year, result.month, result.day, 4, tzinfo=result.tzinfo)
+    return result
+
+
 @login_required
 def aware(request: HttpRequest, study_id: int) -> HttpResponse:
     study = get_object_or_404(Study, pk=study_id)    # type: Memory
@@ -227,7 +241,7 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
             memory.unlock_dt = timezone.now() + timedelta(days=28*3)
         elif memory.step >= 4:
             memory.unlock_dt = timezone.now() + timedelta(days=365)
-        memory.unlock_dt = datetime.combine(memory.unlock_dt.date(), time(hour=4))
+        memory.unlock_dt = _normalize_date(memory.unlock_dt)
         if memory.step <= 4:
             memory.step += 1
         else:
@@ -243,7 +257,7 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
     else:
         # 내일 다시 테스트한다
         memory.unlock_dt = timezone.now() + timedelta(days=1)
-        memory.unlock_dt = datetime.combine(memory.unlock_dt.date(), time(hour=4))
+        memory.unlock_dt = _normalize_date(memory.unlock_dt)
 
         # 한번이라도 틀리면 스텝1부터 다시 시작한다
         memory.step = 1
