@@ -1,9 +1,7 @@
-import random
-from itertools import chain
+from datetime import timedelta
 from operator import attrgetter
 from typing import List
 
-from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -27,6 +25,24 @@ class Exam:
         else:
             self.book = get_object_or_404(Book, pk=book_id)
 
+    @staticmethod
+    def get_after_days_by_step(next_step: int) -> int:
+        week_days = 7
+        month_weeks = 4
+        quarter_months = 3
+        year_days = 365
+
+        if next_step == 1:
+            return 1
+        elif next_step == 2:
+            return week_days
+        elif next_step == 3:
+            return week_days * month_weeks
+        elif next_step == 4:
+            return week_days * month_weeks * quarter_months
+        elif next_step >= 5:
+            return year_days
+
     def count_unlocked_words(self) -> int:
         return Memory.objects.filter(user=self.user, book=self.book, type=self.type, unlock_dt__lte=timezone.now())\
                              .count()
@@ -40,10 +56,12 @@ class Exam:
         number_of_candidate = 50
 
         # 일단 많이 틀리지 않았던 단어들도 골고루 나올 수 있게 충분히 많은 수를 추출한 다음에
-        four_weeks_ago = timezone.now() - timedelta(days=28)
+        recent_studied_unlock_dt = timezone.now() + timedelta(
+            days=self.get_after_days_by_step(5) - self.get_after_days_by_step(3))
         random_memories = Memory.objects.select_related('word') \
-                              .filter(user=self.user, book=self.book, type=self.type, step=Memory.LastStep, modify_dt__lte=four_weeks_ago) \
-                              .order_by('?')[:number_of_candidate]
+                                .filter(user=self.user, book=self.book, type=self.type, step=Memory.LastStep,
+                                        unlock_dt__lte=recent_studied_unlock_dt) \
+                                .order_by('?')[:number_of_candidate]
 
         # 그 중에서 forgot_cnt가 큰 number개의 단어만 추출한다
         random_memories = sorted(random_memories, key=attrgetter('forgot_cnt'), reverse=True)[:number]

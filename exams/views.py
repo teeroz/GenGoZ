@@ -207,51 +207,49 @@ def new_words(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpR
 
 @login_required
 def aware(request: HttpRequest, study_id: int) -> HttpResponse:
-    study = get_object_or_404(Study, pk=study_id)    # type: Memory
+    study = get_object_or_404(Study, pk=study_id)  # type: Memory
     memory = study.memory
+    statistics = __get_statistics(memory)
 
     # 첫 테스트에 바로 맞췄다면
     if memory.group_level <= 0:
         # 통계 업데이트
-        statistics = __get_statistics(memory)
         statistics.aware_cnt += 1
-        statistics.save()
+
+        # 한번에 맞췄다는 숫자 표시
+        memory.aware_cnt += 1
 
         # step을 증가시키고, 그에 맞게 unlock_dt 시각을 변경한다
-        if memory.step == 0:
-            memory.unlock_dt = timezone.now() + timedelta(days=1)
-        elif memory.step == 1:
-            memory.unlock_dt = timezone.now() + timedelta(days=7)
-        elif memory.step == 2:
-            memory.unlock_dt = timezone.now() + timedelta(days=28)
-        elif memory.step == 3:
-            memory.unlock_dt = timezone.now() + timedelta(days=28*3)
-        elif memory.step >= 4:
-            memory.unlock_dt = timezone.now() + timedelta(days=365)
-        memory.unlock_dt = utils.normalize_date(memory.unlock_dt)
         if memory.step <= 4:
             memory.step += 1
-        else:
+        else:  # memory.step >= 5
             if memory.forgot_cnt > 0:
                 memory.forgot_cnt -= 1
 
         # 한번에 맞췄다면 이 단어는 안다고 볼 수 있다
         memory.status = MemoryStatus.Aware
 
-        # 한번에 맞췄다는 숫자 표시
-        memory.aware_cnt += 1
     # 두번째 이후에 맞췄다면
     else:
-        # 내일 다시 테스트한다
-        memory.unlock_dt = timezone.now() + timedelta(days=1)
-        memory.unlock_dt = utils.normalize_date(memory.unlock_dt)
+        # 통계 업데이트
+        statistics.forgot_cnt += 1
+
+        # 한번에 못 맞췄다는 숫자 표시
+        memory.forgot_cnt += 1
 
         # 한번이라도 틀리면 스텝1부터 다시 시작한다
         memory.step = 1
 
-    memory.group_level = 0
-    memory.save()
+        # 한번에 못맞췄다면 이 단어는 모른다고 볼 수 있다
+        memory.status = MemoryStatus.Forgot
 
+    memory.unlock_dt = timezone.now() + timedelta(days=Exam.get_after_days_by_step(memory.step))
+    memory.unlock_dt = utils.normalize_date(memory.unlock_dt)
+
+    memory.group_level = 0
+
+    statistics.save()
+    memory.save()
     study.delete()
 
     return redirect('exam', book_id=memory.book.id, exam_type=memory.type)
@@ -259,20 +257,9 @@ def aware(request: HttpRequest, study_id: int) -> HttpResponse:
 
 @login_required
 def forgot(request: HttpRequest, study_id: int) -> HttpResponse:
-    study = get_object_or_404(Study, pk=study_id)    # type: Study
+    study = get_object_or_404(Study, pk=study_id)  # type: Study
     memory = study.memory
 
-    # 첫 테스트라면
-    if memory.group_level <= 0:
-        # 통계 업데이트
-        statistics = __get_statistics(memory)
-        statistics.forgot_cnt += 1
-        statistics.save()
-
-        # 한번에 못 맞췄다는 숫자 표시
-        memory.forgot_cnt += 1
-
-    memory.status = MemoryStatus.Forgot
     memory.group_level += 1
     memory.save()
 
