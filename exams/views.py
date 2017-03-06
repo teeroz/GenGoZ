@@ -270,10 +270,10 @@ def forgot(request: HttpRequest, study_id: int) -> HttpResponse:
 
 @login_required
 def reset_meaning(request: HttpRequest, study_id: int) -> JsonResponse:
+    user = get_user(request)
     study = get_object_or_404(Study, pk=study_id)    # type: Study
-    word = study.word
     try:
-        memory = Memory.objects.get(word=word, type=ExamTypes.Meaning)
+        memory = Memory.objects.get(user=user, word=study.word, type=ExamTypes.Meaning)
     except ObjectDoesNotExist:
         return JsonResponse({'result': True})
 
