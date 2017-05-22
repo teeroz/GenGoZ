@@ -13,6 +13,14 @@ from exams.exam import Exam
 from exams.models import Memory, MemoryStatus, Statistics, Study, ExamTypes, Word, Book
 
 
+def __get_title(exam_type: ExamTypes) -> str:
+    if exam_type == ExamTypes.Meaning:
+        return '뜻 -> 단어'
+    elif exam_type == ExamTypes.Word:
+        return '단어 -> 뜻'
+    else:
+        return 'GenGoZ Exam'
+
 @login_required
 def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpResponse:
     user = get_user(request)
@@ -52,6 +60,7 @@ def exam(request: HttpRequest, book_id: int, exam_type: ExamTypes) -> HttpRespon
     answer_ex = answer_ex.replace('[', '<code>').replace(']', '</code>')
 
     context = {
+        'title': __get_title(exam_type),
         'book_id': book_id,
         'study': study,
         'question': question,
@@ -95,6 +104,7 @@ def start(request: HttpRequest, a_exam: Exam) -> HttpResponse:
         include_random_memories = False
 
     context = {
+        'title': __get_title(a_exam.type),
         'exam': a_exam,
         'book_id': a_exam.book.id,
         'exam_type': a_exam.type,
