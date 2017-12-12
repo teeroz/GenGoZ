@@ -11,12 +11,12 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['125.209.240.10']
+ALLOWED_HOSTS = ['10.127.118.22']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_ROOT = '/home/irteam/local/gengoz/static'
+STATIC_ROOT = '/home1/irteam/myapps/gengoz/static'
 
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
